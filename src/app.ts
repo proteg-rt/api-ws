@@ -40,6 +40,18 @@ const main = async () => {
             process.send('ready');
         }
     });
+    
+    // Redirigir la ruta raíz a la página del QR
+    provider.http.server.get('/', (req, res) => {
+        res.writeHead(302, { 'Location': '/qr' });
+        res.end();
+    });
+    
+    // Mensaje informativo sobre las rutas disponibles
+    console.log('Servidor iniciado en el puerto 3002');
+    console.log('- Para ver el código QR, visita: http://localhost:3002/qr');
+    console.log('- Para verificar la salud de la API: http://localhost:3002/health');
+    console.log('- Para enviar mensajes: POST a http://localhost:3002/send-message');
 
     await createBot({
         flow: createFlow([flowBienvenida]),

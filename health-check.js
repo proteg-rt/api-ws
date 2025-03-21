@@ -3,8 +3,8 @@ import http from 'http';
 import { exec } from 'child_process';
 
 // Configuración
-const API_URL = 'http://localhost'; // Cambia esto a la URL de tu API
-const API_PORT = process.env.PORT || 3000; // Cambia esto al puerto de tu API
+const API_URL = process.env.HOST || 'localhost'; // Usar HOST de las variables de entorno o localhost por defecto
+const API_PORT = process.env.PORT || 3002; // Puerto corregido a 3002
 const CHECK_INTERVAL = 5 * 60 * 1000; // Verificar cada 5 minutos (en milisegundos)
 const TIMEOUT = 10000; // Tiempo de espera para la respuesta (10 segundos)
 const MAX_RETRIES = 3; // Número máximo de intentos antes de reiniciar
@@ -16,7 +16,7 @@ function checkAPIHealth() {
   console.log(`[${new Date().toISOString()}] Verificando salud de la API...`);
   
   const options = {
-    hostname: API_URL.replace('http://', '').replace('https://', ''),
+    hostname: API_URL,
     port: API_PORT,
     path: '/health', // Asumiendo que tienes un endpoint /health
     method: 'GET',
@@ -85,5 +85,7 @@ function restartAPI() {
 
 // Iniciar verificación periódica
 console.log(`[${new Date().toISOString()}] Iniciando monitoreo de salud de la API...`);
+console.log(`[${new Date().toISOString()}] Para acceder al código QR, visita: http://${API_URL}:${API_PORT}/qr`);
+console.log(`[${new Date().toISOString()}] Para verificar la salud de la API: http://${API_URL}:${API_PORT}/health`);
 checkAPIHealth(); // Verificar inmediatamente al iniciar
 setInterval(checkAPIHealth, CHECK_INTERVAL); // Programar verificaciones periódicas

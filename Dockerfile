@@ -26,5 +26,9 @@ RUN if [ -f ./dist/ecosystem.config.js ]; then rm ./dist/ecosystem.config.js; fi
 # Exponer el puerto que usa tu aplicación
 EXPOSE 3002
 
+# Variable de entorno para Railway
+ENV PORT=3002
+ENV HOST=0.0.0.0
+
 # Comando para iniciar la aplicación
 CMD ["npm", "run", "prod"]

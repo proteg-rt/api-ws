@@ -1,10 +1,13 @@
 // health-check.js
 import http from 'http';
+import https from 'https';
 import { exec } from 'child_process';
 
 // Configuración
-const API_URL = process.env.HOST || 'localhost'; // Usar HOST de las variables de entorno o localhost por defecto
-const API_PORT = process.env.PORT || 3002; // Puerto corregido a 3002
+const API_HOST = process.env.RAILWAY_STATIC_URL ? process.env.RAILWAY_STATIC_URL.replace(/^https?:\/\//, '') : 'localhost';
+const API_PORT = process.env.RAILWAY_STATIC_URL ? 443 : 3002; // En Railway usamos HTTPS (puerto 443)
+const API_PROTOCOL = process.env.RAILWAY_STATIC_URL ? 'https' : 'http';
+const API_PATH = '/health';
 const CHECK_INTERVAL = 5 * 60 * 1000; // Verificar cada 5 minutos (en milisegundos)
 const TIMEOUT = 10000; // Tiempo de espera para la respuesta (10 segundos)
 const MAX_RETRIES = 3; // Número máximo de intentos antes de reiniciar
@@ -14,16 +17,20 @@ let failedAttempts = 0;
 // Función para verificar la salud de la API
 function checkAPIHealth() {
   console.log(`[${new Date().toISOString()}] Verificando salud de la API...`);
+  console.log(`[${new Date().toISOString()}] Intentando conectar a: ${API_PROTOCOL}://${API_HOST}${API_PORT !== 443 ? ':' + API_PORT : ''}${API_PATH}`);
   
   const options = {
-    hostname: API_URL,
+    hostname: API_HOST,
     port: API_PORT,
-    path: '/health', // Asumiendo que tienes un endpoint /health
+    path: API_PATH,
     method: 'GET',
-    timeout: TIMEOUT
+    timeout: TIMEOUT,
+    ...(API_PROTOCOL === 'https' && { rejectUnauthorized: false })
   };
 
-  const req = http.request(options, (res) => {
+  const requester = API_PROTOCOL === 'https' ? https : http;
+
+  const req = requester.request(options, (res) => {
     let data = '';
     
     res.on('data', (chunk) => {
@@ -85,7 +92,9 @@ function restartAPI() {
 
 // Iniciar verificación periódica
 console.log(`[${new Date().toISOString()}] Iniciando monitoreo de salud de la API...`);
-console.log(`[${new Date().toISOString()}] Para acceder al código QR, visita: http://${API_URL}:${API_PORT}/qr`);
-console.log(`[${new Date().toISOString()}] Para verificar la salud de la API: http://${API_URL}:${API_PORT}/health`);
+console.log(`[${new Date().toISOString()}] Para acceder al código QR, visita: ${API_PROTOCOL}://${API_HOST}${API_PORT !== 443 ? ':' + API_PORT : ''}/qr`);
+console.log(`[${new Date().toISOString()}] Para verificar la salud de la API: ${API_PROTOCOL}://${API_HOST}${API_PORT !== 443 ? ':' + API_PORT : ''}${API_PATH}`);
+
+// Iniciar monitoreo
 checkAPIHealth(); // Verificar inmediatamente al iniciar
 setInterval(checkAPIHealth, CHECK_INTERVAL); // Programar verificaciones periódicas

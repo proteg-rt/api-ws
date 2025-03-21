@@ -25,7 +25,21 @@ const main = async () => {
         res.end('Mensaje enviado con exito!')
     }))
     
-    
+    // Endpoint para verificación de salud
+    provider.http.server.get('/health', (req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            service: 'api-ws',
+            uptime: process.uptime()
+        }));
+        
+        // Señal para PM2 de que la aplicación está lista
+        if (process.send) {
+            process.send('ready');
+        }
+    });
 
     await createBot({
         flow: createFlow([flowBienvenida]),

@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsm ./src/app.ts",
+    "build": "tsc",
+    "start": "node ./dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

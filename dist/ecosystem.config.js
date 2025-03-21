@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
       name: "api-ws",
-      script: "./dist/app.js",
+      script: "./app.js",
       watch: false,
       max_memory_restart: "1000M",
       exec_mode: "cluster",
